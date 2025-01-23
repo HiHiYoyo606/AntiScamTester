@@ -1,4 +1,4 @@
-import tempfile, os, random, warnings
+import tempfile, os, random, warnings, time
 import google.generativeai as genai
 import pandas as pd
 import streamlit as st
