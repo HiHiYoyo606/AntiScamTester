@@ -62,8 +62,9 @@ import google.generativeai as genai
 import streamlit as st
 import pandas as pd
 
-@st.cache_data
+
 #Models
+@st.cache_data
 vectorizer = TfidfVectorizer()
 LRclassifier = LogisticRegression(n_jobs=-1)
 SVCclassifier = CalibratedClassifierCV(LinearSVC(dual=False), n_jobs=-1)
