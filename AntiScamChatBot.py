@@ -208,7 +208,8 @@ def main():
                 def highlight_final_row(row):
                     if row.name == len(df) - 1:  # Last row
                         bgcolor = "lightgreen" if row["結果 Result"] == 'Normal' else "lightcoral"
-                        return [f"background-color: {bgcolor}; font-weight: bold"] * len(row)
+                        fontcolor = "black"
+                        return [f"background-color: {bgcolor}; color: {fontcolor}; font-weight: bold"] * len(row)
                     return [''] * len(row)
 
                 st.dataframe(df.style.apply(highlight_final_row, axis=1))
