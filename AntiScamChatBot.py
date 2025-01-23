@@ -89,10 +89,11 @@ st.subheader("模型測試精確度 Model Accuracy")
 
 # 配置Gemini
 genai.configure(api_key="AIzaSyBflj_zpaKbeFyv9WkOVM3d4iJVb5Vz2Hk")
-model =genai.GenerativeModel("gemini-2.0-flash-exp")
+model = genai.GenerativeModel("gemini-2.0-flash-exp")
 st.session_state.chat = model.start_chat(history=[])
 
 def train_models():
+    global models
     try:
         with st.spinner("正在載入資料... Loading data..."):
         #訓練資料
