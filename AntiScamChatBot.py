@@ -137,7 +137,6 @@ def train_models():
 
             for name, classifier in classifiers[0].items():
                 classifier.fit(X_train_tfidf, y_train)
-            st.session_state.models = models
             st.session_state.vectorizer = vectorizer
             st.session_state.classifiers = classifiers
             st.session_state.lastText = "" ############################################## HERE
