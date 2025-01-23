@@ -62,9 +62,7 @@ import google.generativeai as genai
 import streamlit as st
 import pandas as pd
 
-
 #Models
-@st.cache_data
 vectorizer = TfidfVectorizer()
 LRclassifier = LogisticRegression(n_jobs=-1)
 SVCclassifier = CalibratedClassifierCV(LinearSVC(dual=False), n_jobs=-1)
@@ -77,7 +75,6 @@ STACKclassifier = StackingClassifier(estimators=[
     ('sgd', SGDclassifier)
 ], final_estimator=LogisticRegression(), n_jobs=-1)
 
-@st.cache_data
 models = [ #(model, classifier, rate)
     ("sklearn (邏輯迴歸 Logistic Regression)", "LRclassifier", 1),
     ("sklearn (支援向量機 Support Vector Classification)", "SVCclassifier", 1),
@@ -86,18 +83,15 @@ models = [ #(model, classifier, rate)
     ("sklearn (堆疊 Stacking)", "STACKclassifier", 1)
 ]
 
-@st.cache_data
 st.set_page_config(layout="wide")
 st.title("詐騙簡訊偵測器 Anti-Scam Tester")
 st.subheader("模型測試精確度 Model Accuracy")
 
 # 配置Gemini
-@st.cache_data
 genai.configure(api_key="AIzaSyBflj_zpaKbeFyv9WkOVM3d4iJVb5Vz2Hk")
 model =genai.GenerativeModel("gemini-2.0-flash-exp")
 st.session_state.chat = model.start_chat(history=[])
 
-@st.cache_data
 def train_models():
     try:
         with st.spinner("正在載入資料... Loading data..."):
