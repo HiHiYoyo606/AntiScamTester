@@ -138,16 +138,21 @@ def train_models():
 
             for name, classifier in classifiers[0].items():
                 classifier.fit(X_train_tfidf, y_train)
-            st.session_state.models = models
-            st.session_state.vectorizer = vectorizer
-            st.session_state.classifiers = classifiers
-            st.session_state.lastText = "" ############################################## HERE
+            if 'vectorizer' not in st.session_state:
+                st.session_state.vectorizer = vectorizer
+            if 'classifiers' not in st.session_state:
+                st.session_state.classifiers = classifiers
+            if 'lastText' not in st.session_state:
+                st.session_state.lastText = "" ############################################## HERE
     except Exception as e:
         SystemPrint(f"Training falied. Reason: {e}")
         
 if 'modelTrained' not in st.session_state:
     train_models()
     st.session_state.modelTrained = True
+
+if 'models' not in st.session_state:
+    st.session_state.models = models
 
 def main():
     try:
