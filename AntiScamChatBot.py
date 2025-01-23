@@ -202,7 +202,7 @@ def main():
                 
                 # Highlight the last row based on result
                 def highlight_row(row):
-                    bgcolor = "lightgreen" if row["結果 Result"] == 'Normal' else "lightcoral"
+                    bgcolor = "lightgreen" if row["結果 Result"] == MainFunctions.RedefineLabel(0) else "lightcoral"
                     fontcolor = "black"
                     return [f"background-color: {bgcolor}; color: {fontcolor}; font-weight: 700"] * len(row)
 
