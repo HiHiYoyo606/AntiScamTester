@@ -1,10 +1,7 @@
-import gc
-import tempfile
-import os
-import random
-import time
-import warnings
-import logging
+import tempfile, os, random, warnings
+import google.generativeai as genai
+import pandas as pd
+import streamlit as st
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score
@@ -13,21 +10,13 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.svm import LinearSVC
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.ensemble import StackingClassifier
-import streamlit as st
-import pandas as pd
-import google.generativeai as genai
 
-# Suppress warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="streamlit")
 
-# Logging configuration
-logging.basicConfig(filename="debug.log", level=logging.DEBUG)
-
+# Helper functions
 def SystemPrint(message):
-    logging.debug(f"System: {message}")
     print(f"System: {message}")
 
-# Clean temporary directory
 def CleanTempDir():
     tempDir = tempfile.gettempdir()
     for root, dirs, files in os.walk(tempDir):
@@ -36,17 +25,15 @@ def CleanTempDir():
                 os.remove(os.path.join(root, file))
             except Exception as e:
                 continue
-
 CleanTempDir()
 
-# Main Functions
 class MainFunctions:
     @staticmethod
     def Average(numList, rateList):
         total = 0
         for it, r in zip(numList, rateList):
             total += it * r
-        return total / sum(rateList)
+        return total / sum(rateList) 
 
     @staticmethod
     def RedefineLabel(percentage):
@@ -70,102 +57,87 @@ class MainFunctions:
                 SystemPrint(f"Error: {e}")
         return result.text
 
-    @staticmethod
-    def stringIsNullOrBlank(string):
-        return string == "" or string.isspace()
+# Models and configuration
+vectorizer = TfidfVectorizer()
+LRclassifier = LogisticRegression(n_jobs=-1)
+SVCclassifier = CalibratedClassifierCV(LinearSVC(dual=False), n_jobs=-1)
+NBclassifier = MultinomialNB(alpha=0.1, fit_prior=True)
+SGDclassifier = CalibratedClassifierCV(SGDClassifier(n_jobs=-1, loss='hinge'))
+STACKclassifier = StackingClassifier(estimators=[
+    ('lr', LRclassifier), 
+    ('svc', SVCclassifier), 
+    ('nb', NBclassifier), 
+    ('sgd', SGDclassifier)
+], final_estimator=LogisticRegression(), n_jobs=-1)
 
-    @staticmethod
-    def stringStartWithlnOrBlank(string):
-        return string.startswith("\n") or string.startswith(" ")
+models = [
+    ("sklearn (邏輯迴歸 Logistic Regression)", "LRclassifier", 1),
+    ("sklearn (支援向量機 Support Vector Classification)", "SVCclassifier", 1),
+    ("sklearn (單純貝氏 Naive Bayes)", "NBclassifier", 1),
+    ("sklearn (隨機梯度下降 Stochastic Gradient Descent)", "SGDclassifier", 1),
+    ("sklearn (堆疊 Stacking)", "STACKclassifier", 1)
+]
 
-    @staticmethod
-    def stringEndWithlnOrBlank(string):
-        return string.endswith("\n") or string.endswith(" ")
-
-# Configure Streamlit page
 st.set_page_config(layout="wide")
 st.title("詐騙簡訊偵測器 Anti-Scam Tester")
 st.subheader("模型測試精確度 Model Accuracy")
 
-# Gemini configuration
+# Configure Gemini
 genai.configure(api_key="AIzaSyBflj_zpaKbeFyv9WkOVM3d4iJVb5Vz2Hk")
 model = genai.GenerativeModel("gemini-2.0-flash-exp")
 st.session_state.chat = model.start_chat(history=[])
 
-# Cache vectorizer and models
 @st.cache_resource
-def load_vectorizer_and_models():
-    vectorizer = TfidfVectorizer()
-    classifiers = {
-        "LRclassifier": LogisticRegression(n_jobs=-1),
-        "SVCclassifier": CalibratedClassifierCV(LinearSVC(dual=False), n_jobs=-1),
-        "NBclassifier": MultinomialNB(alpha=0.1, fit_prior=True),
-        "SGDclassifier": CalibratedClassifierCV(SGDClassifier(n_jobs=-1, loss='hinge')),
-        "STACKclassifier": StackingClassifier(estimators=[
-            ('lr', LogisticRegression(n_jobs=-1)),
-            ('svc', CalibratedClassifierCV(LinearSVC(dual=False), n_jobs=-1)),
-            ('nb', MultinomialNB(alpha=0.1, fit_prior=True)),
-            ('sgd', CalibratedClassifierCV(SGDClassifier(n_jobs=-1, loss='hinge')))
-        ], final_estimator=LogisticRegression(), n_jobs=-1)
-    }
-    return vectorizer, classifiers
-
-vectorizer, classifiers = load_vectorizer_and_models()
-
-# Training function
-def train_models():
+def load_and_train_models():
     try:
         with st.spinner("正在載入資料... Loading data..."):
             labels, messages = [], []
             file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.txt")
-            with open(file_path, encoding="utf-8") as file:
-                dataList = file.read().split('\n')
-
-            for i, line in enumerate(dataList):
-                try:
-                    if not line.strip():
-                        continue
-                    label, message = line.split('\t')
-                    labels.append(1 if label == 'spam' else 0)
-                    messages.append(message)
-                except Exception as e:
-                    SystemPrint(f"Error in line {i+1}: {line} - {e}")
-                    exit(-1)
+            with open(file_path, encoding="utf-8") as f:
+                dataList = f.read().split('\n')
+                for i, line in enumerate(dataList):
+                    if line.strip():
+                        try:
+                            label, message = line.split('\t')
+                            labels.append(1 if label == 'spam' else 0)
+                            messages.append(message)
+                        except ValueError as e:
+                            SystemPrint(f"Error in line {i+1}: {line} - {e}")
+                            continue
 
             X_train, X_test, y_train, y_test = train_test_split(messages, labels, test_size=0.2, random_state=random.randint(0, 114514))
             X_train_tfidf = vectorizer.fit_transform(X_train)
             X_test_tfidf = vectorizer.transform(X_test)
 
-            st.session_state.update({
-                "Xtfidf": X_test_tfidf,
-                "Ytfidf": y_test
-            })
+            classifiers = {
+                "LRclassifier": LRclassifier,
+                "SVCclassifier": SVCclassifier,
+                "NBclassifier": NBclassifier,
+                "SGDclassifier": SGDclassifier,
+                "STACKclassifier": STACKclassifier
+            }
 
-        with st.spinner("正在訓練模型... Training models..."):
             for name, classifier in classifiers.items():
                 classifier.fit(X_train_tfidf, y_train)
 
-            st.session_state.update({
-                "vectorizer": vectorizer,
-                "classifiers": classifiers
-            })
-
+            return classifiers, X_test_tfidf, y_test, vectorizer
     except Exception as e:
         SystemPrint(f"Training failed. Reason: {e}")
+        return None, None, None, None
 
-if 'modelTrained' not in st.session_state:
-    train_models()
+if 'models' not in st.session_state:
+    st.session_state.classifiers, st.session_state.Xtfidf, st.session_state.Ytfidf, st.session_state.vectorizer = load_and_train_models()
+    st.session_state.models = models
     st.session_state.modelTrained = True
 
-# Main application logic
 def main():
     try:
         with st.spinner("正在測試模型... Testing models..."):
             accuracy_data = []
-            for model_name, classifierKey in classifiers.items():
-                accuracy = accuracy_score(st.session_state.Ytfidf, classifierKey.predict(st.session_state.Xtfidf)) * 100
+            for model_name, classifierKey, _ in st.session_state.models:
+                test_classifier = st.session_state.classifiers[classifierKey]
+                accuracy = accuracy_score(st.session_state.Ytfidf, test_classifier.predict(st.session_state.Xtfidf)) * 100
                 accuracy_data.append({"模型 Model": model_name, "準確度 Accuracy": f"{accuracy:.2f}%"})
-
         st.table(pd.DataFrame(accuracy_data))
 
         message = st.text_area("輸入要測試的訊息：\nEnter your message to analyze:", height=200)
@@ -175,42 +147,75 @@ def main():
                 st.stop()
 
             with st.spinner("正在分析訊息... Analyzing message..."):
+                # Translation and AI Judgement
                 translation = MainFunctions.AskingQuestion(f"""
                     Is this passage in ALL English? If so, return the original passage. If not, translate ALL non-English parts to English and return the new passage.
-                    ONLY RETURN THE RESULT OF the original message or the translated message. DO NOT ADD OTHER WORDS!!!
+                    ONLY RETURN THE RESULT OF original message or the translated message. DO NOT ADD OTHER WORDS!!!
                     message: {message}""")
-                AiJudgement = MainFunctions.AskingQuestion(f"""
-                    How much percentage do you think this message is a spamming message?
-                    Answer me in this format: "N"
-                    For N is a float between 0~100.
-                    message: {translation}""")
-                AiJudgePercentage = float(AiJudgement)
 
-                question_tfidf = vectorizer.transform([translation])
+                time.sleep(1)
+                AiJudgement = MainFunctions.AskingQuestion(f"""How much percentage do you think this message is a spamming message? 
+                    Answer in this format: "N" where N is a float between 0-100 (13.62, 85.72, 50.60, 5.67, 100.00, 0.00 etc.)
+                    message: {translation}""")
+
+                AiJudgePercentage = float(AiJudgement)
+                AiJudgePercentageRate = 1
+
+                # Model Analysis
+                question_tfidf = st.session_state.vectorizer.transform([translation])
                 results_data = []
 
-                for model_name, classifier in classifiers.items():
-                    spam_proba, ham_proba = MainFunctions.get_prediction_proba(classifier, question_tfidf)
+                for model_name, classifierKey, rate in models:
+                    working_classifier = st.session_state.classifiers[classifierKey]
+                    spam_proba, ham_proba = MainFunctions.get_prediction_proba(working_classifier, question_tfidf)
                     results_data.append({
                         "模型 Model": model_name,
                         "結果 Result": MainFunctions.RedefineLabel(spam_proba),
+                        "加權倍率 Rate": rate,
                         "詐騙訊息機率 Scam Probability": f"{spam_proba:.2f}%",
                         "普通訊息機率 Normal Probability": f"{ham_proba:.2f}%"
                     })
 
+                # Add Gemini results
                 results_data.append({
                     "模型 Model": "Gemini",
                     "結果 Result": MainFunctions.RedefineLabel(AiJudgePercentage),
+                    "加權倍率 Rate": AiJudgePercentageRate,
                     "詐騙訊息機率 Scam Probability": f"{AiJudgePercentage:.2f}%",
                     "普通訊息機率 Normal Probability": f"{100.0 - AiJudgePercentage:.2f}%"
                 })
 
+                # Calculate final result
+                spam_percentages = [float(d["詐騙訊息機率 Scam Probability"].rstrip('%')) for d in results_data]
+                rates = [d["加權倍率 Rate"] for d in results_data]
+                final_spam_percentage = MainFunctions.Average(spam_percentages, rates)
+                final_ham_percentage = 100.0 - final_spam_percentage
+
+                # Add final result
+                results_data.append({
+                    "模型 Model": "Final Result",
+                    "結果 Result": MainFunctions.RedefineLabel(final_spam_percentage),
+                    "加權倍率 Rate": sum(rates),
+                    "詐騙訊息機率 Scam Probability": f"{final_spam_percentage:.2f}%",
+                    "普通訊息機率 Normal Probability": f"{final_ham_percentage:.2f}%"
+                })
+
+                # Display results with final row highlight
                 st.subheader("分析結果 Analysis Results")
-                st.dataframe(pd.DataFrame(results_data))
+                df = pd.DataFrame(results_data)
+
+                # Highlight the last row based on result
+                def highlight_final_row(row):
+                    if row.name == len(df) - 1:  # Last row
+                        bgcolor = "lightgreen" if row["結果 Result"] == 'Normal' else "lightcoral"
+                        return [f"background-color: {bgcolor}; font-weight: bold"] * len(row)
+                    return [''] * len(row)
+
+                st.dataframe(df.style.apply(highlight_final_row, axis=1))
 
     except Exception as e:
-        SystemPrint(f"Error! Reason: {e}")
-        input("System: Press any key to exit...")
+        SystemPrint(f"Error! Reason:{e}")
+        input("System: Press any key to exit. . .")
 
 if __name__ == "__main__":
     main()
