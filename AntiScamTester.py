@@ -212,6 +212,8 @@ def main():
                 st.dataframe(rddf.style.apply(highlight_row, axis=1))
                 st.subheader("綜合分析結果 Comprehensive Analysis Result")
                 st.dataframe(rrdf.style.apply(highlight_row, axis=1))
+                st.subheader("翻譯紀錄 Traslation Log")
+                st.text_area("翻譯結果 Translation Result", value=translation, height=200, disabled=True)
 
     except Exception as e:
         SystemPrint(f"Error! Reason:{e}")
