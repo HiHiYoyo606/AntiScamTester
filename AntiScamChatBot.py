@@ -193,24 +193,24 @@ def main():
 
                 # Add final result
                 result_row.append({
-                    "模型 Model": "Final Result",
+                    "模型 Model": "綜合分析結果 Final Result",
                     "結果 Result": MainFunctions.RedefineLabel(final_spam_percentage),
                     "加權倍率 Rate": sum(rates),
                     "詐騙訊息機率 Scam Probability": f"{final_spam_percentage:.2f}%",
                     "普通訊息機率 Normal Probability": f"{final_ham_percentage:.2f}%"
                 })
-
-                # Display results with final row highlight
-                st.subheader("分析結果 Analysis Results")
-                rddf, rrdf = pd.DataFrame(results_data), pd.DataFrame(result_row)
-
+                
                 # Highlight the last row based on result
                 def highlight_row(row):
                     bgcolor = "lightgreen" if row["結果 Result"] == 'Normal' else "lightcoral"
                     fontcolor = "black"
                     return [f"background-color: {bgcolor}; color: {fontcolor}; font-weight: 700"] * len(row)
 
+                # Display results with final row highlight
+                rddf, rrdf = pd.DataFrame(results_data), pd.DataFrame(result_row)
+                st.subheader("個別分析結果 Individual Analysis Results")
                 st.dataframe(rddf.style.apply(highlight_row, axis=1))
+                st.subheader("加權平均分析結果 Weighted Average Analysis Results")
                 st.dataframe(rrdf.style.apply(highlight_row, axis=1))
 
     except Exception as e:
