@@ -143,6 +143,10 @@ def train_models():
             st.session_state.lastText = "" ############################################## HERE
     except Exception as e:
         SystemPrint(f"Training falied. Reason: {e}")
+        
+if 'modelTrained' not in st.session_state:
+    train_models()
+    st.session_state.modelTrained = True
 
 def main():
     try:
