@@ -37,7 +37,7 @@ class MainFunctions:
 
     @staticmethod
     def RedefineLabel(percentage):
-        return "Scam" if percentage >= 50 else "Normal"
+        return "詐騙 Scam" if percentage >= 50 else "普通 Normal"
 
     @staticmethod
     def get_prediction_proba(classifier, question_tfidf):
@@ -178,7 +178,7 @@ def main():
 
                 # Add Gemini results
                 results_data.append({
-                    "模型 Model": "Gemini",
+                    "模型 Model": "Google Gemini",
                     "結果 Result": MainFunctions.RedefineLabel(AiJudgePercentage),
                     "加權倍率 Rate": AiJudgePercentageRate,
                     "詐騙訊息機率 Scam Probability": f"{AiJudgePercentage:.2f}%",
@@ -193,7 +193,7 @@ def main():
 
                 # Add final result
                 result_row.append({
-                    "模型 Model": "綜合分析結果 Final Result",
+                    "模型 Model": "加權平均分析結果 Weighted Average Analysis Results",
                     "結果 Result": MainFunctions.RedefineLabel(final_spam_percentage),
                     "加權倍率 Rate": sum(rates),
                     "詐騙訊息機率 Scam Probability": f"{final_spam_percentage:.2f}%",
@@ -210,7 +210,7 @@ def main():
                 rddf, rrdf = pd.DataFrame(results_data), pd.DataFrame(result_row)
                 st.subheader("個別分析結果 Individual Analysis Results")
                 st.dataframe(rddf.style.apply(highlight_row, axis=1))
-                st.subheader("加權平均分析結果 Weighted Average Analysis Results")
+                st.subheader("綜合分析結果 Comprehensive Analysis Results")
                 st.dataframe(rrdf.style.apply(highlight_row, axis=1))
 
     except Exception as e:
