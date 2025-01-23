@@ -105,7 +105,7 @@ def load_and_train_models():
                             SystemPrint(f"Error in line {i+1}: {line} - {e}")
                             continue
 
-            X_train, X_test, y_train, y_test = train_test_split(messages, labels, test_size=0.2, random_state=random.randint(0, 114514))
+            X_train, X_test, y_train, y_test = train_test_split(messages, labels, test_size=0.2)
             X_train_tfidf = vectorizer.fit_transform(X_train)
             X_test_tfidf = vectorizer.transform(X_test)
 
