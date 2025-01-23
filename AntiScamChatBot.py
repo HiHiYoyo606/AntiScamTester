@@ -163,7 +163,7 @@ def main():
 
                 # Model Analysis
                 question_tfidf = st.session_state.vectorizer.transform([translation])
-                results_data = []
+                results_data, result_row = [], []
 
                 for model_name, classifierKey, rate in models:
                     working_classifier = st.session_state.classifiers[classifierKey]
@@ -192,7 +192,7 @@ def main():
                 final_ham_percentage = 100.0 - final_spam_percentage
 
                 # Add final result
-                results_data.append({
+                result_row.append({
                     "模型 Model": "Final Result",
                     "結果 Result": MainFunctions.RedefineLabel(final_spam_percentage),
                     "加權倍率 Rate": sum(rates),
@@ -202,7 +202,7 @@ def main():
 
                 # Display results with final row highlight
                 st.subheader("分析結果 Analysis Results")
-                df = pd.DataFrame(results_data)
+                rddf, rrdf = pd.DataFrame(results_data), pd.DataFrame(result_row)
 
                 # Highlight the last row based on result
                 def highlight_row(row):
@@ -210,7 +210,8 @@ def main():
                     fontcolor = "black"
                     return [f"background-color: {bgcolor}; color: {fontcolor}; font-weight: 700"] * len(row)
 
-                st.dataframe(df.style.apply(highlight_row, axis=1))
+                st.dataframe(rddf.style.apply(highlight_row, axis=1))
+                st.dataframe(rrdf.style.apply(highlight_row, axis=1))
 
     except Exception as e:
         SystemPrint(f"Error! Reason:{e}")
