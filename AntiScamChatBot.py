@@ -205,12 +205,10 @@ def main():
                 df = pd.DataFrame(results_data)
 
                 # Highlight the last row based on result
-                def highlight_final_row(row):
-                    if row.name == len(df) - 1:  # Last row
-                        bgcolor = "lightgreen" if row["結果 Result"] == 'Normal' else "lightcoral"
-                        fontcolor = "black"
-                        return [f"background-color: {bgcolor}; color: {fontcolor}; font-weight: 700"] * len(row)
-                    return [''] * len(row)
+                def highlight_row(row):
+                    bgcolor = "lightgreen" if row["結果 Result"] == 'Normal' else "lightcoral"
+                    fontcolor = "black"
+                    return [f"background-color: {bgcolor}; color: {fontcolor}; font-weight: 700"] * len(row)
 
                 st.dataframe(df.style.apply(highlight_final_row, axis=1))
 
