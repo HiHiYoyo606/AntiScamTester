@@ -210,7 +210,7 @@ def main():
                     fontcolor = "black"
                     return [f"background-color: {bgcolor}; color: {fontcolor}; font-weight: 700"] * len(row)
 
-                st.dataframe(df.style.apply(highlight_final_row, axis=1))
+                st.dataframe(df.style.apply(highlight_row, axis=1))
 
     except Exception as e:
         SystemPrint(f"Error! Reason:{e}")
