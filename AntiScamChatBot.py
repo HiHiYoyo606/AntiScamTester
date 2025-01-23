@@ -193,7 +193,7 @@ def main():
 
                 # Add final result
                 result_row.append({
-                    "模型 Model": "加權平均分析結果 Weighted Average Analysis Results",
+                    "模型 Model": "加權平均分析結果 Weighted Average Analysis Result",
                     "結果 Result": MainFunctions.RedefineLabel(final_spam_percentage),
                     "加權倍率 Rate": sum(rates),
                     "詐騙訊息機率 Scam Probability": f"{final_spam_percentage:.2f}%",
@@ -210,7 +210,7 @@ def main():
                 rddf, rrdf = pd.DataFrame(results_data), pd.DataFrame(result_row)
                 st.subheader("個別分析結果 Individual Analysis Results")
                 st.dataframe(rddf.style.apply(highlight_row, axis=1))
-                st.subheader("綜合分析結果 Comprehensive Analysis Results")
+                st.subheader("綜合分析結果 Comprehensive Analysis Result")
                 st.dataframe(rrdf.style.apply(highlight_row, axis=1))
 
     except Exception as e:
