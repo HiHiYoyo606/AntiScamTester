@@ -148,6 +148,9 @@ if 'modelTrained' not in st.session_state:
     train_models()
     st.session_state.modelTrained = True
 
+if 'models' not in st.session_state:
+    st.session_state.models = models
+
 def main():
     try:
         # 顯示準確度
