@@ -61,7 +61,7 @@ class MainFunctions:
 vectorizer = TfidfVectorizer()
 LRclassifier = LogisticRegression(n_jobs=-1)
 SVCclassifier = CalibratedClassifierCV(LinearSVC(dual=False), n_jobs=-1)
-NBclassifier = MultinomialNB(alpha=1, fit_prior=True)
+NBclassifier = MultinomialNB(alpha=0.3, fit_prior=True)
 SGDclassifier = CalibratedClassifierCV(SGDClassifier(n_jobs=-1, loss='hinge'))
 STACKclassifier = StackingClassifier(estimators=[
     ('lr', LRclassifier), 
