@@ -158,12 +158,12 @@ def main():
                 translation = ""
                 try:
                     loop = asyncio.get_running_loop()
-                    future = asyncio.run_coroutine_threadsafe(MainFunctions.Translate(translator, message), loop)
+                    future = asyncio.run_coroutine_threadsafe(MainFunctions.Translate(st.session_state.translator, message), loop)
                     translation = future.result()
                 except RuntimeError:
                     loop = asyncio.new_event_loop()
                     asyncio.set_event_loop(loop)
-                    translation = loop.run_until_complete(MainFunctions.Translate(translator, message))
+                    translation = loop.run_until_complete(MainFunctions.Translate(st.session_state.translator, message))
 
                 AiJudgement = MainFunctions.AskingQuestion(f"""How much percentage do you think this message is a spamming message? 
                     Answer in this format: "N" where N is a float between 0-100 (13.62, 85.72, 50.60, 5.67, 100.00, 0.00 etc.)
