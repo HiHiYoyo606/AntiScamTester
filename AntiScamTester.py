@@ -2,6 +2,8 @@ import tempfile, os, random, warnings, time
 import google.generativeai as genai
 import pandas as pd
 import streamlit as st
+import asyncio
+from googletrans import Translator
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score
@@ -56,6 +58,11 @@ class MainFunctions:
             except Exception as e:
                 SystemPrint(f"Error: {e}")
         return result.text
+
+    @staticmethod
+    def Translate(translator, message, source_language='auto', target_language='en'):
+        translated = await translator.translate(text, src=source_lang, dest=target_lang)
+        return translated.text
 
 # Models and configuration
 vectorizer = TfidfVectorizer()
@@ -129,8 +136,9 @@ if 'models' not in st.session_state:
     st.session_state.classifiers, st.session_state.Xtfidf, st.session_state.Ytfidf, st.session_state.vectorizer = load_and_train_models()
     st.session_state.models = models
     st.session_state.modelTrained = True
+    st.session_state.translator = Translator()
 
-def main():
+async def main():
     try:
         with st.spinner("正在測試模型... Testing models..."):
             accuracy_data = []
@@ -148,12 +156,8 @@ def main():
 
             with st.spinner("正在分析訊息... Analyzing message..."):
                 # Translation and AI Judgement
-                translation = MainFunctions.AskingQuestion(f"""
-                    Is this passage in ALL English? If so, return the original passage. If not, translate ALL non-English parts to English and return the new passage.
-                    ONLY RETURN THE RESULT OF original message or the translated message. DO NOT ADD OTHER WORDS!!!
-                    message: {message}""")
+                translation = MainFunctions.Translate(st.session_state.translator, message=message)
 
-                time.sleep(1)
                 AiJudgement = MainFunctions.AskingQuestion(f"""How much percentage do you think this message is a spamming message? 
                     Answer in this format: "N" where N is a float between 0-100 (13.62, 85.72, 50.60, 5.67, 100.00, 0.00 etc.)
                     message: {translation}""")
