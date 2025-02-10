@@ -60,7 +60,7 @@ class MainFunctions:
 
     @staticmethod
     async def Translate(translator, message, source_language='auto', target_language='en'):
-        translated = await translator.translate(text, src=source_language, dest=target_language)
+        translated = await translator.translate(message, src=source_language, dest=target_language)
         return translated.text
 
 # Models and configuration
