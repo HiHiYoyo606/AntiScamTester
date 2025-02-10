@@ -1,8 +1,7 @@
-import tempfile, os, random, warnings, time
+import tempfile, os, warnings
 import google.generativeai as genai
 import pandas as pd
 import streamlit as st
-import asyncio
 from googletrans import Translator
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
