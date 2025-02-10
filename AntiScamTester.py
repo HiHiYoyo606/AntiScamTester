@@ -60,8 +60,8 @@ class MainFunctions:
         return result.text
 
     @staticmethod
-    def Translate(translator, message, source_language='auto', target_language='en'):
-        translated = await translator.translate(text, src=source_lang, dest=target_lang)
+    async def Translate(translator, message, source_language='auto', target_language='en'):
+        translated = await translator.translate(text, src=source_language, dest=target_language)
         return translated.text
 
 # Models and configuration
@@ -138,7 +138,7 @@ if 'models' not in st.session_state:
     st.session_state.modelTrained = True
     st.session_state.translator = Translator()
 
-async def main():
+def main():
     try:
         with st.spinner("正在測試模型... Testing models..."):
             accuracy_data = []
