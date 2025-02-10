@@ -157,7 +157,7 @@ def main():
                 # Translation and AI Judgement
                 translation = asyncio.run(MainFunctions.Translate(st.session_state.translator, message))
                 
-                AiJudgement = MainFunctions.AskingQuestion(f"""How much percentage do you think this message is a spamming message? 
+                AiJudgement = MainFunctions.AskingQuestion(f"""How much percentage do you think this message is a spamming message (only consider this message, not considering other environmental variation)? 
                     Answer in this format: "N" where N is a float between 0-100 (13.62, 85.72, 50.60, 5.67, 100.00, 0.00 etc.)
                     message: {translation}""")
 
