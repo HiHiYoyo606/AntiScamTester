@@ -57,10 +57,6 @@ class MainFunctions:
             except Exception as e:
                 SystemPrint(f"Error: {e}")
         return result.text
-
-
-    def sync_translate(translator, message):
-    
     
     @staticmethod
     async def Translate(translator, message, source_language='auto', target_language='en'):
