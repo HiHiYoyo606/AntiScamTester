@@ -1,4 +1,4 @@
-import tempfile, os, warnings
+import tempfile, os, warnings, asyncio
 import google.generativeai as genai
 import pandas as pd
 import streamlit as st
@@ -137,7 +137,7 @@ if 'models' not in st.session_state:
     st.session_state.modelTrained = True
     st.session_state.translator = Translator()
 
-async def main():
+def main():
     try:
         with st.spinner("正在測試模型... Testing models..."):
             accuracy_data = []
@@ -155,7 +155,7 @@ async def main():
 
             with st.spinner("正在分析訊息... Analyzing message..."):
                 # Translation and AI Judgement
-                translation = await MainFunctions.Translate(st.session_state.translator, message=message)
+                translation = asyncio.run(MainFunctions.Translate(st.session_state.translator, message=message))
 
                 AiJudgement = MainFunctions.AskingQuestion(f"""How much percentage do you think this message is a spamming message? 
                     Answer in this format: "N" where N is a float between 0-100 (13.62, 85.72, 50.60, 5.67, 100.00, 0.00 etc.)
