@@ -223,4 +223,4 @@ async def main():
         input("System: Press any key to exit. . .")
 
 if __name__ == "__main__":
-    await main()
+    main()
