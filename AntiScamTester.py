@@ -2,6 +2,7 @@ import tempfile, os, warnings, asyncio
 import google.generativeai as genai
 import pandas as pd
 import streamlit as st
+import numba
 from googletrans import Translator
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -94,6 +95,7 @@ model = genai.GenerativeModel("gemini-2.0-flash-exp")
 st.session_state.chat = model.start_chat(history=[])
 
 @st.cache_resource
+@numba.jit
 def load_and_train_models():
     try:
         with st.spinner("正在載入資料... Loading data..."):
