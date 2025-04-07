@@ -1,4 +1,4 @@
-import tempfile, os, warnings, asyncio
+import os, warnings, asyncio
 import google.generativeai as genai
 import pandas as pd
 import streamlit as st
