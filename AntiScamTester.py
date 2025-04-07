@@ -18,16 +18,6 @@ warnings.filterwarnings("ignore", category=UserWarning, module="streamlit")
 def SystemPrint(message):
     print(f"System: {message}")
 
-def CleanTempDir():
-    tempDir = tempfile.gettempdir()
-    for root, dirs, files in os.walk(tempDir):
-        for file in files:
-            try:
-                os.remove(os.path.join(root, file))
-            except Exception as e:
-                continue
-CleanTempDir()
-
 class MainFunctions:
     @staticmethod
     def Average(numList, rateList):
