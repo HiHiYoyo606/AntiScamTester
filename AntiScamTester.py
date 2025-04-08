@@ -58,7 +58,7 @@ app = flask.Flask(__name__)
 @app.route("/update")
 def home():
     return "successfully updated!"
-port = int(os.environ.get("PORT", 8080))
+port = int(os.environ.get("PORT", 5000))
 threading.Thread(target=lambda: app.run(host="0.0.0.0", port=port)).start()    
 
 # Models and configuration
