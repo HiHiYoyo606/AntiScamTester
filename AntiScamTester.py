@@ -1,7 +1,8 @@
-import os, warnings, asyncio, flask, threading
+import os, warnings, asyncio
 import google.generativeai as genai
 import pandas as pd
 import streamlit as st
+from dotenv import load_dotenv
 from googletrans import Translator
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -53,13 +54,8 @@ class MainFunctions:
         translated = await translator.translate(message, src=source_language, dest=target_language)
         return translated.text
 
-app = flask.Flask(__name__)
-
-@app.route("/update")
-def home():
-    return "successfully updated!"
-port = int(os.environ.get("PORT", 5000))
-threading.Thread(target=lambda: app.run(host="0.0.0.0", port=port)).start()    
+load_dotenv()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # Models and configuration
 vectorizer = TfidfVectorizer()
