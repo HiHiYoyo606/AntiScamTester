@@ -1,4 +1,4 @@
-import os, warnings, asyncio
+import os, warnings
 import google.generativeai as genai
 import pandas as pd
 import streamlit as st
@@ -49,8 +49,8 @@ class MainFunctions:
         return result.text
     
     @staticmethod
-    async def Translate(translator: Translator, message, source_language='auto', target_language='en'):
-        translated = await translator.translate(message, src=source_language, dest=target_language)
+    def Translate(translator: Translator, message, source_language='auto', target_language='en'):
+        translated = translator.translate(message, src=source_language, dest=target_language)
         return translated.text
 
 load_dotenv()
@@ -128,8 +128,7 @@ if 'models' not in st.session_state:
     st.session_state.models = models
     st.session_state.modelTrained = True
     st.session_state.translator = Translator()
-
-last_message = None
+    st.session_state.last_message = ""
 
 def main():
     try:
@@ -140,22 +139,21 @@ def main():
             accuracy_data.append({"模型 Model": model_name, "準確度 Accuracy": f"{accuracy:.2f}%"})
         st.table(pd.DataFrame(accuracy_data))
 
-        message = st.text_area("輸入要測試的訊息：\nEnter your message to analyze:", height=200)
+        message = st.text_area("輸入要測試的訊息：\nEnter your message to analyze:", height=200).strip()
         if st.button("分析訊息 Analyze Message"):
             if not message or message.isspace():
                 st.warning("請先輸入訊息。Please enter a message to analyze.")
                 st.stop()
             
-            global last_message
-            if message.strip() == last_message:
+            if message == st.session_state.last_message:
                 st.warning("與上一則訊息重複。This message is a duplicate of the previous message.")
                 st.stop()
 
-            last_message = message.strip()
-            print(f"Last message: {last_message}")
+            st.session_state.last_message = message
+            print(f"Last message: {st.session_state.last_message}")
             with st.spinner("正在分析訊息... Analyzing message..."):
                 # Translation and AI Judgement
-                translation = asyncio.run(MainFunctions.Translate(st.session_state.translator, message))
+                translation = MainFunctions.Translate(st.session_state.translator, message)
                 
                 AiJudgement = MainFunctions.AskingQuestion(f"""How much percentage do you think this message is a spamming message (only consider this message, not considering other environmental variation)? 
                     Answer in this format: "N" where N is a float between 0-100 (13.62, 85.72, 50.60, 5.67, 100.00, 0.00 etc.)
