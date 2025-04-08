@@ -218,6 +218,12 @@ def main():
     except Exception as e:
         st.session_state.last_message = ""
         show_error(f"原因 Reason: {e}")
+        information = [
+            "如果下方警告訊息為\"Event loop is closed\", 只需再按一次按鈕即可。",
+            "If the error message below is \"Event loop is closed\", just click the button again."
+        ]
+
+        st.toast("\n".join(information), icon="ℹ️")
 
 if __name__ == "__main__":
     main()
