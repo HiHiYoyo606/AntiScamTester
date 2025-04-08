@@ -216,6 +216,7 @@ def main():
                 st.text_area("", value=translation, height=200, disabled=True)
 
     except Exception as e:
+        st.session_state.last_message = ""
         show_error(f"原因 Reason: {e}")
 
 if __name__ == "__main__":
