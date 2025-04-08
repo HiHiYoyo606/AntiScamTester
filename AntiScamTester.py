@@ -1,4 +1,4 @@
-import os, warnings
+import os, warnings, asyncio
 import google.generativeai as genai
 import pandas as pd
 import streamlit as st
@@ -37,14 +37,11 @@ class MainFunctions:
         return spam_proba, ham_proba
 
     @staticmethod
-    def AskingQuestion(question):
-        err = 1
-        while err == 1:
-            try:
-                result = st.session_state.chat.send_message(question)
-                err = 0
-            except Exception as e:
-                show_error(f"Gemini處理失敗...Gemini processing failed. 原因 Reason: {e}")
+    async def AskingQuestion(question):
+        try:
+            result = await st.session_state.chat.send_message(question)
+        except Exception as e:
+            show_error(f"Gemini處理失敗...Gemini processing failed. 原因 Reason: {e}")
 
         return result.text
     
@@ -157,9 +154,9 @@ def main():
                 # Translation and AI Judgement
                 translation = MainFunctions.Translate(st.session_state.translator, message)
                 
-                AiJudgement = MainFunctions.AskingQuestion(f"""How much percentage do you think this message is a spamming message (only consider this message, not considering other environmental variation)? 
+                AiJudgement = asyncio.run(MainFunctions.AskingQuestion(f"""How much percentage do you think this message is a spamming message (only consider this message, not considering other environmental variation)? 
                     Answer in this format: "N" where N is a float between 0-100 (13.62, 85.72, 50.60, 5.67, 100.00, 0.00 etc.)
-                    message: {translation}""")
+                    message: {translation}"""))
 
                 AiJudgePercentage = float(AiJudgement)
                 AiJudgePercentageRate = 1
