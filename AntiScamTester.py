@@ -1,4 +1,4 @@
-import os, warnings, asyncio
+import os, warnings, asyncio, flask, threading
 import google.generativeai as genai
 import pandas as pd
 import streamlit as st
@@ -49,9 +49,17 @@ class MainFunctions:
         return result.text
     
     @staticmethod
-    async def Translate(translator, message, source_language='auto', target_language='en'):
+    async def Translate(translator: Translator, message, source_language='auto', target_language='en'):
         translated = await translator.translate(message, src=source_language, dest=target_language)
         return translated.text
+
+app = flask.Flask(__name__)
+
+@app.route("/update")
+def home():
+    return "successfully updated!"
+port = int(os.environ.get("PORT", 8080))
+threading.Thread(target=lambda: app.run(host="0.0.0.0", port=port)).start()    
 
 # Models and configuration
 vectorizer = TfidfVectorizer()
