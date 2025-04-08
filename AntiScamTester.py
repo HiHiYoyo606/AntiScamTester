@@ -83,7 +83,7 @@ st.title("詐騙簡訊偵測器 Anti-Scam Tester")
 st.subheader("模型測試精確度 Model Accuracy")
 
 # Configure Gemini
-genai.configure(api_key="AIzaSyBflj_zpaKbeFyv9WkOVM3d4iJVb5Vz2Hk")
+genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("gemini-2.0-flash-exp")
 st.session_state.chat = model.start_chat(history=[])
 
