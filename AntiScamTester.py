@@ -4,6 +4,7 @@ import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
 from googletrans import Translator
+from google.api_core.exceptions import RetryError, HttpError
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score
@@ -14,10 +15,8 @@ from sklearn.calibration import CalibratedClassifierCV
 from sklearn.ensemble import StackingClassifier
 
 warnings.filterwarnings("ignore", category=UserWarning, module="streamlit")
-
-# Helper functions
-def SystemPrint(message):
-    print(f"System: {message}")
+def show_error(error_message):
+    st.error(f"執行時錯誤 Error: {error_message}")
 
 class MainFunctions:
     @staticmethod
@@ -46,7 +45,8 @@ class MainFunctions:
                 result = st.session_state.chat.send_message(question)
                 err = 0
             except Exception as e:
-                SystemPrint(f"Error: {e}")
+                show_error("Gemini處理失敗...Gemini processing failed. 原因 Reason: " + e)
+
         return result.text
     
     @staticmethod
@@ -90,39 +90,38 @@ st.session_state.chat = model.start_chat(history=[])
 @st.cache_resource
 def load_and_train_models():
     try:
-        with st.spinner("正在載入資料... Loading data..."):
-            labels, messages = [], []
-            file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.txt")
-            with open(file_path, encoding="utf-8") as f:
-                dataList = f.read().split('\n')
-                for i, line in enumerate(dataList):
-                    if line.strip():
-                        try:
-                            label, message = line.split('\t')
-                            labels.append(1 if label == 'spam' else 0)
-                            messages.append(message)
-                        except ValueError as e:
-                            SystemPrint(f"Error in line {i+1}: {line} - {e}")
-                            continue
+        labels, messages = [], []
+        file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.txt")
+        with open(file_path, encoding="utf-8") as f:
+            dataList = f.read().split('\n')
+            for i, line in enumerate(dataList):
+                if line.strip():
+                    try:
+                        label, message = line.split('\t')
+                        labels.append(1 if label == 'spam' else 0)
+                        messages.append(message)
+                    except ValueError as e:
+                        show_error(f"訓練集有誤...An error occurred in the training data. 位於行 Position: {i+1}: {line} - {e}")
+                        continue
 
-            X_train, X_test, y_train, y_test = train_test_split(messages, labels, test_size=0.2)
-            X_train_tfidf = vectorizer.fit_transform(X_train)
-            X_test_tfidf = vectorizer.transform(X_test)
+        X_train, X_test, y_train, y_test = train_test_split(messages, labels, test_size=0.2)
+        X_train_tfidf = vectorizer.fit_transform(X_train)
+        X_test_tfidf = vectorizer.transform(X_test)
 
-            classifiers = {
-                "LRclassifier": LRclassifier,
-                "SVCclassifier": SVCclassifier,
-                "NBclassifier": NBclassifier,
-                "SGDclassifier": SGDclassifier,
-                "STACKclassifier": STACKclassifier
-            }
+        classifiers = {
+            "LRclassifier": LRclassifier,
+            "SVCclassifier": SVCclassifier,
+            "NBclassifier": NBclassifier,
+            "SGDclassifier": SGDclassifier,
+            "STACKclassifier": STACKclassifier
+        }
 
-            for name, classifier in classifiers.items():
-                classifier.fit(X_train_tfidf, y_train)
+        for name, classifier in classifiers.items():
+            classifier.fit(X_train_tfidf, y_train)
 
-            return classifiers, X_test_tfidf, y_test, vectorizer
+        return classifiers, X_test_tfidf, y_test, vectorizer
     except Exception as e:
-        SystemPrint(f"Training failed. Reason: {e}")
+        show_error("訓練失敗...Training failed. 原因 Reason: " + e)
         return None, None, None, None
 
 if 'models' not in st.session_state:
@@ -133,12 +132,11 @@ if 'models' not in st.session_state:
 
 def main():
     try:
-        with st.spinner("正在測試模型... Testing models..."):
-            accuracy_data = []
-            for model_name, classifierKey, _ in st.session_state.models:
-                test_classifier = st.session_state.classifiers[classifierKey]
-                accuracy = accuracy_score(st.session_state.Ytfidf, test_classifier.predict(st.session_state.Xtfidf)) * 100
-                accuracy_data.append({"模型 Model": model_name, "準確度 Accuracy": f"{accuracy:.2f}%"})
+        accuracy_data = []
+        for model_name, classifierKey, _ in st.session_state.models:
+            test_classifier = st.session_state.classifiers[classifierKey]
+            accuracy = accuracy_score(st.session_state.Ytfidf, test_classifier.predict(st.session_state.Xtfidf)) * 100
+            accuracy_data.append({"模型 Model": model_name, "準確度 Accuracy": f"{accuracy:.2f}%"})
         st.table(pd.DataFrame(accuracy_data))
 
         message = st.text_area("輸入要測試的訊息：\nEnter your message to analyze:", height=200)
@@ -213,7 +211,6 @@ def main():
                 st.text_area("", value=translation, height=200, disabled=True)
 
     except Exception as e:
-        SystemPrint(f"Error! Reason:{e}")
         input("System: Press any key to exit. . .")
 
 if __name__ == "__main__":
