@@ -4,7 +4,6 @@ import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
 from googletrans import Translator
-from google.api_core.exceptions import RetryError, HttpError
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score
