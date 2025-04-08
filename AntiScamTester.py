@@ -129,6 +129,8 @@ if 'models' not in st.session_state:
     st.session_state.modelTrained = True
     st.session_state.translator = Translator()
 
+last_message = None
+
 def main():
     try:
         accuracy_data = []
@@ -143,7 +145,13 @@ def main():
             if not message or message.isspace():
                 st.warning("請先輸入訊息。Please enter a message to analyze.")
                 st.stop()
-
+            
+            global last_message
+            if message.strip() == last_message:
+                st.warning("與上一則訊息重複。This message is a duplicate of the previous message.")
+                st.stop()
+                
+            last_message = message.strip()
             with st.spinner("正在分析訊息... Analyzing message..."):
                 # Translation and AI Judgement
                 translation = asyncio.run(MainFunctions.Translate(st.session_state.translator, message))
