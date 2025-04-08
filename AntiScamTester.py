@@ -128,8 +128,6 @@ if 'models' not in st.session_state:
     st.session_state.models = models
     st.session_state.modelTrained = True
     st.session_state.translator = Translator()
-if 'last_message' not in st.session_state:
-    st.session_state.last_message = ""
 
 def main():
     try:
@@ -146,6 +144,9 @@ def main():
                 st.warning("請先輸入訊息。Please enter a message to analyze.")
                 st.stop()
             
+            if 'last_message' not in st.session_state:
+                st.session_state.last_message = ""
+
             if message == st.session_state.last_message:
                 st.warning("與上一則訊息重複。This message is a duplicate of the previous message.")
                 st.stop()
