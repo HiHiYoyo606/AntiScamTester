@@ -128,6 +128,7 @@ if 'models' not in st.session_state:
     st.session_state.models = models
     st.session_state.modelTrained = True
     st.session_state.translator = Translator()
+if 'last_message' not in st.session_state:
     st.session_state.last_message = ""
 
 def main():
@@ -217,7 +218,7 @@ def main():
                 st.text_area("", value=translation, height=200, disabled=True)
 
     except Exception as e:
-        show_error(f"執行時錯誤...An error occurred while running. 原因 Reason: {e}")
+        show_error(f"原因 Reason: {e}")
 
 if __name__ == "__main__":
     main()
