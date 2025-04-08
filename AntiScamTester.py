@@ -150,8 +150,9 @@ def main():
             if message.strip() == last_message:
                 st.warning("與上一則訊息重複。This message is a duplicate of the previous message.")
                 st.stop()
-                
+
             last_message = message.strip()
+            print(f"Last message: {last_message}")
             with st.spinner("正在分析訊息... Analyzing message..."):
                 # Translation and AI Judgement
                 translation = asyncio.run(MainFunctions.Translate(st.session_state.translator, message))
@@ -218,7 +219,7 @@ def main():
                 st.text_area("", value=translation, height=200, disabled=True)
 
     except Exception as e:
-        input("System: Press any key to exit. . .")
+        show_error("執行時錯誤...An error occurred while running. 原因 Reason: " + e)
 
 if __name__ == "__main__":
     main()
