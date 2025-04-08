@@ -44,7 +44,7 @@ class MainFunctions:
                 result = st.session_state.chat.send_message(question)
                 err = 0
             except Exception as e:
-                show_error("Gemini處理失敗...Gemini processing failed. 原因 Reason: " + e)
+                show_error(f"Gemini處理失敗...Gemini processing failed. 原因 Reason: {e}")
 
         return result.text
     
@@ -120,7 +120,7 @@ def load_and_train_models():
 
         return classifiers, X_test_tfidf, y_test, vectorizer
     except Exception as e:
-        show_error("訓練失敗...Training failed. 原因 Reason: " + e)
+        show_error(f"訓練失敗...Training failed. 原因 Reason: {e}")
         return None, None, None, None
 
 if 'models' not in st.session_state:
@@ -219,7 +219,7 @@ def main():
                 st.text_area("", value=translation, height=200, disabled=True)
 
     except Exception as e:
-        show_error("執行時錯誤...An error occurred while running. 原因 Reason: " + e)
+        show_error(f"執行時錯誤...An error occurred while running. 原因 Reason: {e}")
 
 if __name__ == "__main__":
     main()
