@@ -37,17 +37,17 @@ class MainFunctions:
         return spam_proba, ham_proba
 
     @staticmethod
-    async def AskingQuestion(question):
+    def AskingQuestion(question):
         try:
-            result = await st.session_state.chat.send_message(question)
+            result = st.session_state.chat.send_message(question)
         except Exception as e:
             show_error(f"Gemini處理失敗...Gemini processing failed. 原因 Reason: {e}")
 
         return result.text
     
     @staticmethod
-    def Translate(translator: Translator, message, source_language='auto', target_language='en'):
-        translated = translator.translate(message, src=source_language, dest=target_language)
+    async def Translate(translator: Translator, message, source_language='auto', target_language='en'):
+        translated = await translator.translate(message, src=source_language, dest=target_language)
         return translated.text
 
 load_dotenv()
@@ -152,11 +152,11 @@ def main():
             print(f"Last message: {st.session_state.last_message}")
             with st.spinner("正在分析訊息... Analyzing message..."):
                 # Translation and AI Judgement
-                translation = MainFunctions.Translate(st.session_state.translator, message)
+                translation = asyncio.run(MainFunctions.Translate(st.session_state.translator, message))
                 
-                AiJudgement = asyncio.run(MainFunctions.AskingQuestion(f"""How much percentage do you think this message is a spamming message (only consider this message, not considering other environmental variation)? 
+                AiJudgement = MainFunctions.AskingQuestion(f"""How much percentage do you think this message is a spamming message (only consider this message, not considering other environmental variation)? 
                     Answer in this format: "N" where N is a float between 0-100 (13.62, 85.72, 50.60, 5.67, 100.00, 0.00 etc.)
-                    message: {translation}"""))
+                    message: {translation}""")
 
                 AiJudgePercentage = float(AiJudgement)
                 AiJudgePercentageRate = 1
