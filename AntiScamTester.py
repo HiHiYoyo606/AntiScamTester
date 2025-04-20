@@ -145,7 +145,6 @@ def load_and_train_models():
             model_display_name = models[i-1][0]
             update_progress(0, f"正在訓練模型 ({i}/{num_models_to_train}): {model_display_name}...")
             classifier.fit(X_train_tfidf, y_train)
-            update_progress(1, f"模型訓練完成: {model_display_name}.")
             i = i + 1
 
         progress_bar.progress(1.0, text="所有模型載入與訓練完成. All models loaded and trained.")
