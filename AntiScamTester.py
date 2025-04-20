@@ -1,4 +1,4 @@
-import os, warnings, asyncio
+import os, warnings
 import google.generativeai as genai
 import pandas as pd
 import streamlit as st
@@ -47,8 +47,8 @@ class MainFunctions:
         return result.text
     
     @staticmethod
-    async def Translate(translator: Translator, message, source_language='auto', target_language='en'):
-        translated = await translator.translate(message, src=source_language, dest=target_language)
+    def Translate(translator: Translator, message, source_language='auto', target_language='en'):
+        translated = translator.translate(message, src=source_language, dest=target_language)
         return translated.text
 
 load_dotenv()
@@ -183,8 +183,8 @@ def main():
             print(f"Last message: {st.session_state.last_message}")
             with st.spinner("正在分析訊息... Analyzing message..."):
                 # Translation and AI Judgement
-                translation = asyncio.run(MainFunctions.Translate(st.session_state.translator, message))
-                
+                translation = MainFunctions.Translate(st.session_state.translator, message)
+
                 AiJudgement = MainFunctions.AskingQuestion(f"""How much percentage do you think this message is a spamming message (only consider this message, not considering other environmental variation)? 
                     Answer in this format: "N" where N is a float between 0-100 (13.62, 85.72, 50.60, 5.67, 100.00, 0.00 etc.)
                     message: {translation}""")
