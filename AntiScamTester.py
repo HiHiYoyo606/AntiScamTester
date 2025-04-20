@@ -83,7 +83,7 @@ models = [
 
 st.set_page_config(layout="wide")
 st.title("詐騙簡訊偵測器 Anti-Scam Tester")
-st.caption("表格可以調整行列大小！The tables are sizeable!")
+st.caption("表格可以調整行列大小及拖曳！The tables are sizeable and able to be toggled!")
 st.subheader("模型訓練資料 Model training data")
 
 # Configure Gemini
