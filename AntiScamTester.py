@@ -11,7 +11,7 @@ from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.svm import LinearSVC
 from sklearn.calibration import CalibratedClassifierCV
-from sklearn.ensemble import StackingClassifier
+from sklearn.ensemble import StackingClassifier, RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 
 warnings.filterwarnings("ignore", category=UserWarning, module="streamlit")
@@ -61,11 +61,14 @@ SVCclassifier = CalibratedClassifierCV(LinearSVC(dual=False), n_jobs=-1)
 NBclassifier = MultinomialNB(alpha=0.08451, fit_prior=True)
 SGDclassifier = CalibratedClassifierCV(SGDClassifier(n_jobs=-1, loss='hinge'))
 DTclassifier = DecisionTreeClassifier()
+RFclassifier = RandomForestClassifier(n_jobs=-1)
 STACKclassifier = StackingClassifier(estimators=[
     ('lr', LRclassifier), 
     ('svc', SVCclassifier), 
     ('nb', NBclassifier), 
-    ('sgd', SGDclassifier)
+    ('sgd', SGDclassifier),
+    ('dt', DTclassifier),
+    ('rf', RFclassifier)
 ], final_estimator=LogisticRegression(), n_jobs=-1)
 
 models = [
@@ -73,8 +76,9 @@ models = [
     ("sklearn (支援向量機 Support Vector Classification)", "SVCclassifier", 1),
     ("sklearn (單純貝氏 Naive Bayes)", "NBclassifier", 1),
     ("sklearn (隨機梯度下降 Stochastic Gradient Descent)", "SGDclassifier", 1),
-    ("sklearn (堆疊 Stacking)", "STACKclassifier", 1),
-    ("sklearn (決策樹 Decision Tree)", "DTclassifier", 1)
+    ("sklearn (決策樹 Decision Tree)", "DTclassifier", 1),
+    ("sklearn (隨機森林 Random Forest)", "RFclassifier", 1),
+    ("sklearn (堆疊 Stacking)", "STACKclassifier", 1)
 ]
 
 st.set_page_config(layout="wide")
@@ -113,7 +117,8 @@ def load_and_train_models():
             "NBclassifier": NBclassifier,
             "SGDclassifier": SGDclassifier,
             "STACKclassifier": STACKclassifier,
-            "DTclassifier": DTclassifier
+            "DTclassifier": DTclassifier,
+            "RFclassifier": RFclassifier
         }
 
         for name, classifier in classifiers.items():
