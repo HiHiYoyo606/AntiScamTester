@@ -12,6 +12,7 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.svm import LinearSVC
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.ensemble import StackingClassifier
+from sklearn.tree import DecisionTreeClassifier
 
 warnings.filterwarnings("ignore", category=UserWarning, module="streamlit")
 def show_error(error_message):
@@ -59,6 +60,7 @@ LRclassifier = LogisticRegression(n_jobs=-1)
 SVCclassifier = CalibratedClassifierCV(LinearSVC(dual=False), n_jobs=-1)
 NBclassifier = MultinomialNB(alpha=0.08451, fit_prior=True)
 SGDclassifier = CalibratedClassifierCV(SGDClassifier(n_jobs=-1, loss='hinge'))
+DTclassifier = DecisionTreeClassifier()
 STACKclassifier = StackingClassifier(estimators=[
     ('lr', LRclassifier), 
     ('svc', SVCclassifier), 
@@ -71,7 +73,8 @@ models = [
     ("sklearn (支援向量機 Support Vector Classification)", "SVCclassifier", 1),
     ("sklearn (單純貝氏 Naive Bayes)", "NBclassifier", 1),
     ("sklearn (隨機梯度下降 Stochastic Gradient Descent)", "SGDclassifier", 1),
-    ("sklearn (堆疊 Stacking)", "STACKclassifier", 1)
+    ("sklearn (堆疊 Stacking)", "STACKclassifier", 1),
+    ("sklearn (決策樹 Decision Tree)", "DTclassifier", 1)
 ]
 
 st.set_page_config(layout="wide")
@@ -109,7 +112,8 @@ def load_and_train_models():
             "SVCclassifier": SVCclassifier,
             "NBclassifier": NBclassifier,
             "SGDclassifier": SGDclassifier,
-            "STACKclassifier": STACKclassifier
+            "STACKclassifier": STACKclassifier,
+            "DTclassifier": DTclassifier
         }
 
         for name, classifier in classifiers.items():
