@@ -146,11 +146,12 @@ def load_and_train_models():
             update_progress(0, f"正在訓練模型 ({i}/{num_models_to_train}): {model_display_name}...")
             classifier.fit(X_train_tfidf, y_train)
             update_progress(1, f"模型訓練完成: {model_display_name}.")
+            i = i + 1
 
         progress_bar.progress(1.0, text="所有模型載入與訓練完成. All models loaded and trained.")
         time.sleep(0.5) # 短暫停留讓使用者看到完成狀態
         progress_bar.empty() # 完成後移除進度條
-        
+
         return classifiers, X_test_tfidf, y_test, vectorizer
     except Exception as e:
         show_error(f"訓練失敗...Training failed. 原因 Reason: {e}")
