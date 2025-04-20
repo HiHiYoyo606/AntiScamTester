@@ -106,7 +106,7 @@ def load_and_train_models():
             progress_bar.progress(progress_percentage, text=text)
             time.sleep(0.1)
 
-        update_progress(0, "正在讀取訓練資料... Reading training data...") # 更新初始文字
+        update_progress(1, "正在讀取訓練資料... Reading training data...") # 更新初始文字
         labels, messages = [], []
         file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.txt")
         with open(file_path, encoding="utf-8") as f:
@@ -122,13 +122,11 @@ def load_and_train_models():
                 except ValueError as e:
                     show_error(f"訓練集有誤...An error occurred in the training data. 位於行 Position: {i+1}: {line} - {e}")
                     continue
-        update_progress(1, "資料讀取完成. Data reading complete.") # 完成第 1 步
 
-        update_progress(0, "正在分割與向量化資料... Splitting and vectorizing data...")
+        update_progress(1, "正在分割與向量化資料... Splitting and vectorizing data...")
         X_train, X_test, y_train, y_test = train_test_split(messages, labels, test_size=0.2)
         X_train_tfidf = vectorizer.fit_transform(X_train)
         X_test_tfidf = vectorizer.transform(X_test)
-        update_progress(1, "資料向量化完成. Data vectorization complete.") # 完成第 2 步
 
         classifiers = {
             "LRclassifier": LRclassifier,
@@ -143,7 +141,7 @@ def load_and_train_models():
         i = 1
         for name, classifier in classifiers.items():
             model_display_name = models[i-1][0]
-            update_progress(0, f"正在訓練模型 ({i}/{num_models_to_train}): {model_display_name}...")
+            update_progress(1, f"正在訓練模型 ({i}/{num_models_to_train}): {model_display_name}...")
             classifier.fit(X_train_tfidf, y_train)
             i = i + 1
 
