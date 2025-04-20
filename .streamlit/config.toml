@@ -1,0 +1,12 @@
+[theme]
+# 主色調 (用於互動元件) - 設定為淺藍色
+primaryColor="#87CEFA"  # LightSkyBlue 是一個不錯的淺藍色選擇，您也可以換成其他淺藍色碼
+
+# 背景色 - 設定為黑色
+backgroundColor="#000000"
+
+# 次要背景色 (例如側邊欄) - 建議也使用深色系以搭配黑色背景
+secondaryBackgroundColor="#1F1F1F" # 例如深灰色，您可以調整
+
+# 主要文字顏色 - 設定為白色
+textColor="#FFFFFF"

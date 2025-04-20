@@ -83,7 +83,7 @@ models = [
 
 st.set_page_config(layout="wide")
 st.title("詐騙簡訊偵測器 Anti-Scam Tester")
-st.subheader("模型測試精確度 Model Accuracy")
+st.subheader("模型訓練資料 Model training data")
 
 # Configure Gemini
 genai.configure(api_key=GEMINI_API_KEY)
@@ -175,9 +175,11 @@ def main():
                 "召回率 Recall": recall,
                 "精準度 Precision": precision
             })
-        
+        pddf = pd.DataFrame(accuracy_data)
+        pddf.style.apply()
+
         st.dataframe(
-            pd.DataFrame(accuracy_data),
+            data=pddf,
             column_config={
                 "模型 Model": st.column_config.TextColumn(
                     "模型 Model", 
@@ -208,6 +210,7 @@ def main():
                     width="medium"
                 )
             },
+            
         )
 
         message = st.text_area("輸入要測試的訊息：\nEnter your message to analyze:", height=200).strip()
