@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from googletrans import Translator
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, recall_score, precision_score
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.svm import LinearSVC
@@ -141,8 +141,30 @@ def main():
         for model_name, classifierKey, _ in st.session_state.models:
             test_classifier = st.session_state.classifiers[classifierKey]
             accuracy = accuracy_score(st.session_state.Ytfidf, test_classifier.predict(st.session_state.Xtfidf)) * 100
-            accuracy_data.append({"模型 Model": model_name, "準確度 Accuracy": f"{accuracy:.2f}%"})
+            recall = recall_score(st.session_state.Ytfidf, test_classifier.predict(st.session_state.Xtfidf)) * 100
+            precision = precision_score(st.session_state.Ytfidf, test_classifier.predict(st.session_state.Xtfidf)) * 100
+            accuracy_data.append({
+                "模型 Model": model_name, 
+                "準確度 Accuracy": f"{accuracy:.2f}%",
+                "召回率 Recall": f"{recall:.2f}%",
+                "精準度 Precision": f"{precision:.2f}%"
+            })
         st.table(pd.DataFrame(accuracy_data))
+        st.markdown("""
+        **指標說明 (Metric Explanations):**
+
+        *   **準確度 (Accuracy):**
+            *   模型整體預測正確的比例（包含正確預測為詐騙和正確預測為普通的樣本）。
+            *   *Accuracy: The overall proportion of correct predictions (both scam and normal).*
+
+        *   **召回率 (Recall):**
+            *   在所有 **實際為詐騙** 的訊息中，模型成功將其預測為詐騙的比例。高召回率表示模型擅長找出詐騙訊息，較少漏網之魚。
+            *   *Recall: The proportion of **actual scam** messages that the model correctly identified as scam. High recall means the model is good at finding most of the scam messages.*
+
+        *   **精準度 (Precision):**
+            *   在所有 **模型預測為詐騙** 的訊息中，實際真的是詐騙的比例。高精準度表示模型預測為詐騙的訊息可信度高，較少誤判（將普通訊息判為詐騙）。
+            *   *Precision: The proportion of messages **predicted as scam** by the model that are actually scam. High precision means that when the model predicts scam, it is very likely to be correct.*
+        """)
 
         message = st.text_area("輸入要測試的訊息：\nEnter your message to analyze:", height=200).strip()
         if st.button("分析訊息 Analyze Message"):
