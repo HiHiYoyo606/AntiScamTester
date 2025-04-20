@@ -164,19 +164,18 @@ def main():
         accuracy_data = []
         for model_name, classifierKey, _ in st.session_state.models:
             test_classifier = st.session_state.classifiers[classifierKey]
-            accuracy = accuracy_score(st.session_state.Ytfidf, test_classifier.predict(st.session_state.Xtfidf)) * 100
-            recall = recall_score(st.session_state.Ytfidf, test_classifier.predict(st.session_state.Xtfidf)) * 100
-            precision = precision_score(st.session_state.Ytfidf, test_classifier.predict(st.session_state.Xtfidf)) * 100
+            y_pred = test_classifier.predict(st.session_state.Xtfidf)
+
+            accuracy = accuracy_score(st.session_state.Ytfidf, y_pred) * 100
+            recall = recall_score(st.session_state.Ytfidf, y_pred) * 100
+            precision = precision_score(st.session_state.Ytfidf, y_pred) * 100
             accuracy_data.append({
                 "模型 Model": model_name, 
                 "準確度 Accuracy": accuracy,
                 "召回率 Recall": recall,
                 "精準度 Precision": precision
-                
-                # "準確度 Accuracy": f"{accuracy:.2f}%",
-                # "召回率 Recall": f"{recall:.2f}%",
-                # "精準度 Precision": f"{precision:.2f}%"
             })
+        
         st.dataframe(
             pd.DataFrame(accuracy_data),
             column_config={
