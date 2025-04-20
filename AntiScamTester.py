@@ -1,4 +1,4 @@
-import os, warnings, asyncio
+import os, warnings, asyncio, time
 import google.generativeai as genai
 import pandas as pd
 import streamlit as st
@@ -90,26 +90,45 @@ genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("gemini-2.0-flash-exp")
 st.session_state.chat = model.start_chat(history=[])
 
-@st.cache_resource
+@st.cache_resource(show_spinner=False)
 def load_and_train_models():
     try:
+        num_models_to_train = len(models) # 使用全域 models 列表計算數量
+        total_steps = 2 + num_models_to_train
+        current_step = 0
+        progress_text = "正在初始化模型載入... Initializing model loading..."
+        progress_bar = st.progress(0, text=progress_text)
+
+        def update_progress(step_increment, text):
+            nonlocal current_step
+            current_step += step_increment
+            progress_percentage = min(1.0, current_step / total_steps)
+            progress_bar.progress(progress_percentage, text=text)
+            time.sleep(0.1)
+
+        update_progress(0, "正在讀取訓練資料... Reading training data...") # 更新初始文字
         labels, messages = [], []
         file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.txt")
         with open(file_path, encoding="utf-8") as f:
             dataList = f.read().split('\n')
             for i, line in enumerate(dataList):
-                if line.strip():
-                    try:
-                        label, message = line.split('\t')
-                        labels.append(1 if label == 'spam' else 0)
-                        messages.append(message)
-                    except ValueError as e:
-                        show_error(f"訓練集有誤...An error occurred in the training data. 位於行 Position: {i+1}: {line} - {e}")
-                        continue
+                if not line.strip():
+                    continue
 
+                try:
+                    label, message = line.split('\t')
+                    labels.append(1 if label == 'spam' else 0)
+                    messages.append(message)
+                except ValueError as e:
+                    show_error(f"訓練集有誤...An error occurred in the training data. 位於行 Position: {i+1}: {line} - {e}")
+                    continue
+        update_progress(1, "資料讀取完成. Data reading complete.") # 完成第 1 步
+
+        update_progress(0, "正在分割與向量化資料... Splitting and vectorizing data...")
         X_train, X_test, y_train, y_test = train_test_split(messages, labels, test_size=0.2)
         X_train_tfidf = vectorizer.fit_transform(X_train)
         X_test_tfidf = vectorizer.transform(X_test)
+        update_progress(1, "資料向量化完成. Data vectorization complete.") # 完成第 2 步
 
         classifiers = {
             "LRclassifier": LRclassifier,
@@ -121,9 +140,17 @@ def load_and_train_models():
             "RFclassifier": RFclassifier
         }
 
+        i = 1
         for name, classifier in classifiers.items():
+            model_display_name = models[i-1][0]
+            update_progress(0, f"正在訓練模型 ({i}/{num_models_to_train}): {model_display_name}...")
             classifier.fit(X_train_tfidf, y_train)
+            update_progress(1, f"模型訓練完成: {model_display_name}.")
 
+        progress_bar.progress(1.0, text="所有模型載入與訓練完成. All models loaded and trained.")
+        time.sleep(0.5) # 短暫停留讓使用者看到完成狀態
+        progress_bar.empty() # 完成後移除進度條
+        
         return classifiers, X_test_tfidf, y_test, vectorizer
     except Exception as e:
         show_error(f"訓練失敗...Training failed. 原因 Reason: {e}")
