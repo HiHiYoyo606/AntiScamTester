@@ -175,11 +175,9 @@ def main():
                 "召回率 Recall": recall,
                 "精準度 Precision": precision
             })
-        pddf = pd.DataFrame(accuracy_data)
-        pddf.style.apply()
 
         st.dataframe(
-            data=pddf,
+            data=pd.DataFrame(accuracy_data),
             column_config={
                 "模型 Model": st.column_config.TextColumn(
                     "模型 Model", 
