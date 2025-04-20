@@ -104,7 +104,6 @@ def load_and_train_models():
             current_step += step_increment
             progress_percentage = min(1.0, current_step / total_steps)
             progress_bar.progress(progress_percentage, text=text)
-            time.sleep(0.1)
 
         update_progress(1, "正在讀取訓練資料... Reading training data...") # 更新初始文字
         labels, messages = [], []
@@ -178,7 +177,7 @@ def main():
                 # "召回率 Recall": f"{recall:.2f}%",
                 # "精準度 Precision": f"{precision:.2f}%"
             })
-        st.table(
+        st.dataframe(
             pd.DataFrame(accuracy_data),
             column_config={
                 "模型 Model": st.column_config.TextColumn(
@@ -209,7 +208,7 @@ def main():
                     format="%.2f%%",
                     width="medium"
                 )
-            }
+            },
         )
 
         message = st.text_area("輸入要測試的訊息：\nEnter your message to analyze:", height=200).strip()
@@ -277,7 +276,7 @@ def main():
                     "普通訊息機率 Normal Probability": f"{final_ham_percentage:.2f}%"
                 })
                 
-                # Highlight the last row based on result
+                # Highlight the row based on result
                 def highlight_row(row):
                     bgcolor = "lightgreen" if row["結果 Result"] == MainFunctions.RedefineLabel(0) else "lightcoral"
                     fontcolor = "black"
